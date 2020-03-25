@@ -1,0 +1,52 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: circadiaapi
+app: circadiaapi-app
+org: advanceparty
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: ap-southeast-2
+  apiKeys:
+    - CIRCADIA_CLIENT_KEY
+
+# service-wide environment variables
+environment:
+  SLACK_BOT_TOKEN: ${param:SLACK_BOT_TOKEN}
+  SLACK_SIGNING_SECRET: ${param:SLACK_SIGNING_SECRET}
+  CLIENT_SECRET: ${param:CLIENT_SECRET}
+  TEMP_API_PW: ${param:TEMP_API_PW}
+
+# you can add packaging information here
+#package:
+#  include:
+#    - include-me.js
+#    - include-me-dir/**
+#  exclude:
+#    - exclude-me.js
+#    - exclude-me-dir/**
+
+functions:
+  getUsers:
+    handler: handler.users
+    events:
+      - http:
+          path: api/users
+          method: get
+          cors: true
+          private: true
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin

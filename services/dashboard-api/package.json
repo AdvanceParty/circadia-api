@@ -7,5 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Gil Fewster <gil@theroyals.com.au> (http://theroyals.com.au/)",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@slack/web-api": "^5.8.0"
+  },
+  "devDependencies": {
+    "serverless-dotenv-plugin": "^2.3.2",
+    "serverless-offline": "^6.1.0"
+  }
 }
