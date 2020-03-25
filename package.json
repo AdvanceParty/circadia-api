@@ -1,0 +1,11 @@
+{
+  "name": "circadia-api",
+  "version": "1.0.0",
+  "description": "Serverless API for Circadia, The Royals dashboard tool",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gil Fewster <gil@theroyals.com.au> (http://theroyals.com.au/)",
+  "license": "ISC"
+}
