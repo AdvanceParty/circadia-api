@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "serverless-dotenv-plugin": "^2.3.2",
+    "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.1.0"
   }
 }

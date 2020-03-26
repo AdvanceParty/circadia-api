@@ -1,22 +1,6 @@
-'use strict'
-
 const { WebClient } = require('@slack/web-api')
 
-// import authenticateRequest from './_utils/authenticateRequest';
-// import { forbidden } from './_responses/forbidden';
-
-// module.exports.getUsers = async event => {
-//   const token = process.env.SLACK_BOT_TOKEN
-//   const web = new WebClient(token)
-//   const result = await web.users.list()
-
-//   return {
-//     statusCode: 200,
-//     body: JSON.stringify(result, null, 2),
-//   }
-// }
-
-module.exports.users = async (event, context, callback) => {
+module.exports.userList = async (event, context, callback) => {
   const token = process.env.SLACK_BOT_TOKEN
   const web = new WebClient(token)
   const result = await web.users.list()
