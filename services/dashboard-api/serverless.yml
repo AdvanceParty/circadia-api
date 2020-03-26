@@ -9,13 +9,13 @@ plugins:
 
 custom:
   apiVersion: 'v01'
-  dynamodb:
-    start:
-      port: 8000
-      inMemory: true
-      migrate: false
-      # migration:
-      #   dir: offline/migrations
+  # dynamodb:
+  #   start:
+  #     port: 8000
+  #     inMemory: true
+  #     migrate: false
+  # migration:
+  #   dir: offline/migrations
 
 provider:
   name: aws
@@ -23,7 +23,7 @@ provider:
   region: ap-southeast-2
   stage: dev
   environment:
-    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    USER_TABLE: ${self:service}-${opt:stage, self:provider.stage}
   apiKeys:
     - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
@@ -35,7 +35,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}'
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}'
 
 # service-wide environment variables
 environment:
@@ -62,30 +62,30 @@ functions:
           method: get
           cors: true
           private: true
-  saveUser:
-    handler: functions/rest.addUser
-    events:
-      - http:
-          path: api/users/add
-          method: get
-          cors: true
-          private: true
-  create:
-    handler: functions/create.create
-    events:
-      - http:
-          path: api/users/create
-          method: post
-          cors: true
-          # private: true
-  loadUsers:
-    handler: functions/rest.loadUser
-    events:
-      - http:
-          path: api/users/get
-          method: get
-          cors: true
-          private: true
+  # saveUser:
+  #   handler: functions/rest.addUser
+  #   events:
+  #     - http:
+  #         path: api/users/add
+  #         method: get
+  #         cors: true
+  #         private: true
+  # create:
+  #   handler: functions/create.create
+  #   events:
+  #     - http:
+  #         path: api/users/create
+  #         method: post
+  #         cors: true
+  #         # private: true
+  # loadUsers:
+  #   handler: functions/rest.loadUser
+  #   events:
+  #     - http:
+  #         path: api/users/get
+  #         method: get
+  #         cors: true
+  #         private: true
   # websocket:
   #   handler: handler.websocket.socket
   #   events:
@@ -95,16 +95,19 @@ functions:
   #         route: $default
   #     - websocket:
   #         route: $disconnect
-resources:
-  Resources:
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      BillingMode: PAY_PER_REQUEST
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-            TableName: ${self:provider.environment.DYNAMODB_TABLE}
+# resources:
+#   Resources:
+#     UsersTable:
+#       Type: AWS::DynamoDB::Table
+#       # BillingMode: PAY_PER_REQUEST
+#       DeletionPolicy: Retain
+#       Properties:
+#         AttributeDefinitions:
+#           - AttributeName: userId
+#             AttributeType: S
+#           - AttributeName: userName
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: userId
+#             KeyType: HASH
+#         TableName: ${self:provider.environment.USER_TABLE}

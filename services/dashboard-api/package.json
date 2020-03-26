@@ -9,7 +9,8 @@
   "author": "Gil Fewster <gil@theroyals.com.au> (http://theroyals.com.au/)",
   "license": "ISC",
   "dependencies": {
-    "@slack/web-api": "^5.8.0"
+    "@slack/web-api": "^5.8.0",
+    "uuid": "^7.0.2"
   },
   "devDependencies": {
     "serverless-dotenv-plugin": "^2.3.2",
