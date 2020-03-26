@@ -9,6 +9,7 @@ plugins:
 
 custom:
   apiVersion: 'v01'
+  usersTableName: users
   # dynamodb:
   #   start:
   #     port: 8000
@@ -23,7 +24,7 @@ provider:
   region: ap-southeast-2
   stage: dev
   environment:
-    USER_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    USER_TABLE: ${self:custom.usersTableName}
   apiKeys:
     - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
@@ -35,7 +36,13 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}'
+      Resource:
+        - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:dynamodb'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'table/${self:custom.usersTableName}'
 
 # service-wide environment variables
 environment:
@@ -62,30 +69,18 @@ functions:
           method: get
           cors: true
           private: true
-  # saveUser:
-  #   handler: functions/rest.addUser
-  #   events:
-  #     - http:
-  #         path: api/users/add
-  #         method: get
-  #         cors: true
-  #         private: true
-  # create:
-  #   handler: functions/create.create
-  #   events:
-  #     - http:
-  #         path: api/users/create
-  #         method: post
-  #         cors: true
-  #         # private: true
-  # loadUsers:
-  #   handler: functions/rest.loadUser
-  #   events:
-  #     - http:
-  #         path: api/users/get
-  #         method: get
-  #         cors: true
-  #         private: true
+  getMessages:
+    handler: functions/getMessages.getMessages
+    events:
+      - http:
+          path: api/getMessages
+          method: get
+  putMessage:
+    handler: functions/putMessage.putMessage
+    events:
+      - http:
+          path: api/putMessage
+          method: post
   # websocket:
   #   handler: handler.websocket.socket
   #   events:
@@ -95,19 +90,19 @@ functions:
   #         route: $default
   #     - websocket:
   #         route: $disconnect
-# resources:
-#   Resources:
-#     UsersTable:
-#       Type: AWS::DynamoDB::Table
-#       # BillingMode: PAY_PER_REQUEST
-#       DeletionPolicy: Retain
-#       Properties:
-#         AttributeDefinitions:
-#           - AttributeName: userId
-#             AttributeType: S
-#           - AttributeName: userName
-#             AttributeType: S
-#         KeySchema:
-#           - AttributeName: userId
-#             KeyType: HASH
-#         TableName: ${self:provider.environment.USER_TABLE}
+resources:
+  Resources:
+    MessagesTable:
+      # BillingMode: PAY_PER_REQUEST
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.usersTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
