@@ -65,7 +65,7 @@ functions:
     handler: functions/slack.userList
     events:
       - http:
-          path: api/slack/users
+          path: api/users
           method: get
           cors: true
           private: true
@@ -98,7 +98,7 @@ resources:
       Properties:
         TableName: ${self:custom.usersTableName}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: userId
             AttributeType: S
         KeySchema:
           - AttributeName: id
