@@ -3,27 +3,26 @@ app: circadiaapi-app
 org: advanceparty
 
 plugins:
+  - serverless-plugin-scripts
   - serverless-dotenv-plugin
   - serverless-dynamodb-local
   - serverless-offline
 
 custom:
   apiVersion: 'v01'
-  usersTableName: users
-  # dynamodb:
-  #   start:
-  #     port: 8000
-  #     inMemory: true
-  #     migrate: false
-  # migration:
-  #   dir: offline/migrations
+  usersTableName: circadia-users-${opt:stage, 'dev'}
+  region: ap-southeast-2
+  scripts:
+    hooks:
+      'deploy:finalize': sls invoke -f updateSlackMembersTable
 
 provider:
   name: aws
   runtime: nodejs12.x
-  region: ap-southeast-2
+  region: ${self:custom.region}
   stage: dev
   environment:
+    REGION: ${self:custom.region}
     USER_TABLE: ${self:custom.usersTableName}
   apiKeys:
     - CIRCADIA_CLIENT_KEY
@@ -51,36 +50,26 @@ environment:
   CLIENT_SECRET: ${param:CLIENT_SECRET}
   TEMP_API_PW: ${param:TEMP_API_PW}
 
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
-
 functions:
-  getUserList:
-    handler: functions/slack.userList
+  updateSlackMembersTable:
+    handler: functions/scheduled/users.updateTable
     events:
+      - schedule:
+          rate: rate(6 hours)
+          enabled: true
       - http:
-          path: api/users
+          path: api/update/slackMembers
           method: get
           cors: true
           private: true
-  getMessages:
-    handler: functions/getMessages.getMessages
+  listUsers:
+    handler: functions/users.list
     events:
       - http:
-          path: api/getMessages
+          path: api/users/list
           method: get
-  putMessage:
-    handler: functions/putMessage.putMessage
-    events:
-      - http:
-          path: api/putMessage
-          method: post
+          cors: true
+          private: true
   # websocket:
   #   handler: handler.websocket.socket
   #   events:
@@ -92,17 +81,18 @@ functions:
   #         route: $disconnect
 resources:
   Resources:
-    MessagesTable:
-      # BillingMode: PAY_PER_REQUEST
+    UsersTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
       Properties:
         TableName: ${self:custom.usersTableName}
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
+        # ProvisionedThroughput:
+        #   ReadCapacityUnits: 1
+        #   WriteCapacityUnits: 1
