@@ -82,7 +82,7 @@ functions:
           cors: true
           private: true
   listUsers:
-    handler: functions/users.list
+    handler: functions/handlers.listUsers
     events:
       - http:
           path: api/users/list

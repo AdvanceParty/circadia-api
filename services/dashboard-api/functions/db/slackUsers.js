@@ -1,6 +1,4 @@
-const AWS = require('aws-sdk')
-AWS.config.update({ region: process.env.REGION })
-const dynamodb = new AWS.DynamoDB.DocumentClient({})
+const { putRecord, updateRecord } = require('./crudDyanmodb')
 
 /**
  *
@@ -24,48 +22,6 @@ const updateUserProperty = (userId, propName, object) => {
     Key,
     UpdateExpression,
     ExpressionAttributeValues,
-  })
-}
-
-//  = null, userDndStatus = null, userPresence = null
-
-// const updateUserProfile = (userId, userProfile) => {
-//     const TableName = process.env.USER_PROFILES_TABLE
-//     const Key = {id: userId};
-//     const UpdateExpression = 'set profile = :p';
-//     const ExpressionAttributeValues = {':p' : userProfile};
-//     return updateRecord({TableName, Key, UpdateExpression, ExpressionAttributeValues})
-// }
-
-// const updateUserDndStatus = (userId, userDndStatus) => {
-//     const TableName = process.env.USER_PROFILES_TABLE
-//     const Key = {id: userId};
-//     const UpdateExpression = 'set dndStatus = :d';
-//     const ExpressionAttributeValues = {':d' : userDndStatus};
-//     return updateRecord({TableName, Key, UpdateExpression, ExpressionAttributeValues})
-//   }
-
-const putRecord = ({ TableName, Item }) => {
-  return new Promise((resolve, reject) => {
-    dynamodb.put({ TableName, Item }, (err, data) => {
-      err ? reject(err) : resolve(true)
-    })
-  })
-}
-
-const updateRecord = ({
-  TableName,
-  Key,
-  UpdateExpression,
-  ExpressionAttributeValues,
-}) => {
-  return new Promise((resolve, reject) => {
-    dynamodb.update(
-      { TableName, Key, UpdateExpression, ExpressionAttributeValues },
-      (err, data) => {
-        err ? reject(err) : resolve(true)
-      },
-    )
   })
 }
 

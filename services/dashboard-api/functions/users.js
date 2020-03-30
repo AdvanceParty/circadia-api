@@ -1,35 +1,33 @@
-const AWS = require('aws-sdk')
-AWS.config.update({ region: process.env.REGION })
-const dynamodb = new AWS.DynamoDB.DocumentClient({})
+// const createError = require('http-errors')
+// const middy = require('middy')
+// const { stringifyResponse } = require('../middleware')
+// const {
+//   httpHeaderNormalizer,
+//   httpErrorHandler,
+//   jsonBodyParser,
+//   cors,
+// } = require('middy/middlewares')
 
-const createError = require('http-errors')
-const middy = require('middy')
-const { stringifyResponse } = require('../middleware')
-const {
-  httpHeaderNormalizer,
-  httpErrorHandler,
-  jsonBodyParser,
-  cors,
-} = require('middy/middlewares')
+// const { scanTable } = require('./db/crudDyanmodb')
 
-const listUsers = (event, context, callback) => {
-  dynamodb.scan({ TableName: process.env.USER_PROFILES_TABLE }, (e, data) => {
-    if (e) {
-      const error = createError.InternalServerError(
-        'Error retrieving user list',
-      )
-      error.details = e
-      throw e
-    } else {
-      const result = data.Items.map(item => ({ id: item.id, item }))
-      callback(null, { body: result })
-    }
-  })
-}
+// const listUsers = async (event, context, callback) => {
+//   let items = []
+//   let error
 
-module.exports.list = middy(listUsers)
-  .use(cors())
-  .use(jsonBodyParser())
-  .use(httpHeaderNormalizer())
-  .use(stringifyResponse())
-  .use(httpErrorHandler()) // must be last middleware
+//   try {
+//     const data = await scanTable({ TableName: process.env.USER_PROFILES_TABLE })
+//     items = data.Items.map(item => ({ id: item.id, item }))
+//   } catch (e) {
+//     console.error(e)
+//     const error = createError.InternalServerError('Error retrieving user list')
+//   }
+
+//   callback(null, { body: { items, error } })
+// }
+
+// module.exports.list = middy(listUsers)
+//   .use(cors())
+//   .use(jsonBodyParser())
+//   .use(httpHeaderNormalizer())
+//   .use(stringifyResponse())
+//   .use(httpErrorHandler()) // must be last middleware
