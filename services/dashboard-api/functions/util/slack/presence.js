@@ -5,7 +5,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({})
 const { WebClient } = require('@slack/web-api')
 const createError = require('http-errors')
 const middy = require('middy')
-const { stringifyResponse } = require('../../middleware')
+const { stringifyResponse } = require('../../../middleware')
 const {
   httpHeaderNormalizer,
   httpErrorHandler,
@@ -33,7 +33,18 @@ const getUserItemFromData = userData => {
   }
 }
 
-const memberIsActive = member => !member.is_bot && !member.deleted
+const getUserIdList = () => {
+  return new Promise((resolve, reject) => {
+    dynamodb.scan({ TableName: process.env.USER_TABLE }, (e, data) => {
+      if (e) {
+        reject(e)
+      } else {
+        resolve(data.Items.map(item => item.id))
+      }
+    })
+  })
+}
+
 const putRecord = record => {
   return new Promise((resolve, reject) => {
     dynamodb.put(record, (err, data) => {
@@ -42,13 +53,15 @@ const putRecord = record => {
   })
 }
 
-const updateActiveMembers = async (event, context, callback) => {
+const updateAllPresence = async (event, context, callback) => {
   try {
-    const slackData = await web.users.list()
-    let count = 0
+    const users = await getUserIdList()
+
     let startTime = Date.now()
     await Promise.all(
-      slackData.members.map(async member => {
+      users.map(async user => {
+        const userPresence = await web.users.getPresence({ user })
+
         if (memberIsActive(member)) {
           const record = getUserItemFromData(member)
           const result = await putRecord({
@@ -71,7 +84,7 @@ const updateActiveMembers = async (event, context, callback) => {
   callback(null, { body: { recordCount: count, duration } })
 }
 
-module.exports.updateTable = middy(updateActiveMembers)
+module.exports.refreshDb = middy(updateAllPresence)
   .use(cors())
   .use(jsonBodyParser())
   .use(httpHeaderNormalizer())

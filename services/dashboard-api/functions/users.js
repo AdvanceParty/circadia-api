@@ -13,7 +13,7 @@ const {
 } = require('middy/middlewares')
 
 const listUsers = (event, context, callback) => {
-  dynamodb.scan({ TableName: process.env.USER_TABLE }, (e, data) => {
+  dynamodb.scan({ TableName: process.env.USER_PROFILES_TABLE }, (e, data) => {
     if (e) {
       const error = createError.InternalServerError(
         'Error retrieving user list',

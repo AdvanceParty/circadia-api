@@ -9,6 +9,7 @@
   "author": "Gil Fewster <gil@theroyals.com.au> (http://theroyals.com.au/)",
   "license": "ISC",
   "dependencies": {
+    "@slack/rtm-api": "^5.0.3",
     "@slack/web-api": "^5.8.0",
     "http-errors": "^1.7.3",
     "middy": "^0.34.0",

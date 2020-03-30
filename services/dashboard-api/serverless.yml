@@ -11,10 +11,11 @@ plugins:
 custom:
   apiVersion: 'v01'
   usersTableName: circadia-users-${opt:stage, 'dev'}
+  userProfilesTableName: circadia-userProfiles-${opt:stage, 'dev'}
   region: ap-southeast-2
   scripts:
     hooks:
-      'deploy:finalize': sls invoke -f updateSlackMembersTable
+      'deploy:finalize': sls invoke -f refreshMemberList
 
 provider:
   name: aws
@@ -24,6 +25,7 @@ provider:
   environment:
     REGION: ${self:custom.region}
     USER_TABLE: ${self:custom.usersTableName}
+    USER_PROFILES_TABLE: ${self:custom.userProfilesTableName}
   apiKeys:
     - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
@@ -42,6 +44,12 @@ provider:
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
               - 'table/${self:custom.usersTableName}'
+        - 'Fn::Join':
+            - ':'
+            - - 'arn:aws:dynamodb'
+              - Ref: 'AWS::Region'
+              - Ref: 'AWS::AccountId'
+              - 'table/${self:custom.userProfilesTableName}'
 
 # service-wide environment variables
 environment:
@@ -51,14 +59,25 @@ environment:
   TEMP_API_PW: ${param:TEMP_API_PW}
 
 functions:
-  updateSlackMembersTable:
-    handler: functions/scheduled/users.updateTable
+  refreshMemberList:
+    handler: functions/util/slack/members.fetch
     events:
       - schedule:
           rate: rate(6 hours)
           enabled: true
       - http:
-          path: api/update/slackMembers
+          path: utils/slack/members/fetch
+          method: get
+          cors: true
+          private: true
+  refreshPresence:
+    handler: functions/util/slack/presence.refreeshDb
+    events:
+      - schedule:
+          rate: rate(5 minutes)
+          enabled: true
+      - http:
+          path: utils/slack/members/presence
           method: get
           cors: true
           private: true
@@ -70,15 +89,6 @@ functions:
           method: get
           cors: true
           private: true
-  # websocket:
-  #   handler: handler.websocket.socket
-  #   events:
-  #     - websocket:
-  #       route: $connect
-  #     - websocket:
-  #         route: $default
-  #     - websocket:
-  #         route: $disconnect
 resources:
   Resources:
     UsersTable:
@@ -93,6 +103,15 @@ resources:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        # ProvisionedThroughput:
-        #   ReadCapacityUnits: 1
-        #   WriteCapacityUnits: 1
+    UserStatusTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        TableName: ${self:custom.userProfilesTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
