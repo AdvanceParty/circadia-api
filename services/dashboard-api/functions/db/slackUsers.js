@@ -1,29 +1,58 @@
-const { putRecord, updateRecord } = require('./crudDyanmodb')
+const { updateItem, scanTable } = require('./crudDyanmodb')
 
-/**
- *
- * @param {Array} userList array of userId strings ['id_1','id_2...'id_n']
- * @returns {Promise} resolve to true if successul, or throws error on fail.
- */
-const updateUserList = userList => {
-  const TableName = process.env.USER_TABLE
-  const Item = { id: 'activeUsers', userList }
-  return putRecord({ TableName, Item })
-}
-
-const updateUserProperty = (userId, propName, object) => {
-  // const TableName = process.env.USER_TABLE
+const updateUser = (userId, user) => {
   const TableName = process.env.USER_PROFILES_TABLE
   const Key = { id: userId }
-  const UpdateExpression = `set ${propName} = :n`
-  const ExpressionAttributeValues = { ':n': object }
-  return updateRecord({
+
+  const expressions = []
+  const ExpressionAttributeValues = {}
+
+  if (user.profile) {
+    expressions.push(`profile = :p`)
+    ExpressionAttributeValues[':p'] = user.profile
+  }
+
+  if (user.accountType) {
+    expressions.push(`accountType = :a`)
+    ExpressionAttributeValues[':a'] = user.accountType
+  }
+
+  if (user.dndStatus) {
+    expressions.push(`dndStatus = :d`)
+    ExpressionAttributeValues[':d'] = user.dndStatus
+  }
+
+  if (user.presence) {
+    expressions.push(`presence = :presence`)
+    ExpressionAttributeValues[':presence'] = user.presence
+  }
+
+  const params = {
     TableName,
     Key,
-    UpdateExpression,
+    UpdateExpression: `set ${expressions.join(', ')}`,
     ExpressionAttributeValues,
+  }
+
+  return updateItem(params)
+}
+
+const getActiveUsers = () => {
+  const params = {
+    TableName: process.env.USER_PROFILES_TABLE,
+    FilterExpression: 'accountType = :a', // optional
+    ExpressionAttributeValues: { ':a': 'active' }, // optional
+  }
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const data = await scanTable(params)
+      resolve(data.Items)
+    } catch (e) {
+      reject(e)
+    }
   })
 }
 
-module.exports.updateUserList = updateUserList
-module.exports.updateUserProperty = updateUserProperty
+module.exports.updateUser = updateUser
+module.exports.getActiveUsers = getActiveUsers

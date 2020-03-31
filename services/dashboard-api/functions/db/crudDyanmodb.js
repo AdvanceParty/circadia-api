@@ -2,7 +2,23 @@ const AWS = require('aws-sdk')
 AWS.config.update({ region: process.env.REGION })
 const dynamodb = new AWS.DynamoDB.DocumentClient({})
 
-const putRecord = ({ TableName, Item }) => {
+const queryTable = params => {
+  return new Promise((resolve, reject) => {
+    dynamodb.query(params, (err, data) => {
+      err ? reject(err) : resolve(data)
+    })
+  })
+}
+
+const getItem = ({ TableName, Key }) => {
+  return new Promise((resolve, reject) => {
+    dynamodb.get({ TableName, Key }, (err, data) => {
+      err ? reject(err) : resolve(data)
+    })
+  })
+}
+
+const putItem = ({ TableName, Item }) => {
   return new Promise((resolve, reject) => {
     dynamodb.put({ TableName, Item }, (err, data) => {
       err ? reject(err) : resolve(true)
@@ -10,7 +26,7 @@ const putRecord = ({ TableName, Item }) => {
   })
 }
 
-const updateRecord = ({
+const updateItem = ({
   TableName,
   Key,
   UpdateExpression,
@@ -26,18 +42,16 @@ const updateRecord = ({
   })
 }
 
-const queryTable = () => {
-  // todo
-}
-
-const scanTable = ({ TableName }) => {
+const scanTable = params => {
   return new Promise((resolve, reject) => {
-    dynamodb.scan({ TableName }, (err, data) => {
+    dynamodb.scan(params, (err, data) => {
       err ? reject(err) : resolve(data)
     })
   })
 }
 
-module.exports.putRecord = putRecord
-module.exports.updateRecord = updateRecord
+module.exports.getItem = getItem
+module.exports.putItem = putItem
+module.exports.updateItem = updateItem
 module.exports.scanTable = scanTable
+module.exports.queryTable = queryTable

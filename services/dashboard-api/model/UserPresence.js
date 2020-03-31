@@ -1,10 +1,13 @@
+const ACTIVE_VALUES = ['active']
+
 class UserPresence {
   constructor() {
     return this
   }
 
   setData(obj) {
-    this.active = obj.active
+    this.presence = obj.presence
+    this.active = ACTIVE_VALUES.includes(obj.presence)
     return this
   }
 }

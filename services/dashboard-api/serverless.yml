@@ -15,7 +15,7 @@ custom:
   region: ap-southeast-2
   scripts:
     hooks:
-      'deploy:finalize': sls invoke -f refreshMemberList
+      'deploy:finalize': sls invoke -f fetchSlackMembers
 
 provider:
   name: aws
@@ -59,36 +59,40 @@ environment:
   TEMP_API_PW: ${param:TEMP_API_PW}
 
 functions:
-  refreshMemberList:
-    handler: functions/util/slack/members.fetch
+  #### Handlers for caching external data sources with db ####
+  fetchSlackMembers:
+    handler: handlers/slackFetchers.fetchAllMembers
     events:
       - schedule:
           rate: rate(6 hours)
           enabled: true
       - http:
-          path: utils/slack/members/fetch
+          path: fetchExternal/slack/members
           method: get
           cors: true
           private: true
   refreshPresence:
-    handler: functions/util/slack/presence.refreeshDb
+    handler: handlers/slackFetchers.fetchAllPresence
     events:
       - schedule:
           rate: rate(5 minutes)
           enabled: true
       - http:
-          path: utils/slack/members/presence
+          path: fetchExternal/slack/memberPresence
           method: get
           cors: true
           private: true
+  #### Main Handlers for Web Application ####
   listUsers:
-    handler: functions/handlers.listUsers
+    handler: handlers/webApp.listUsers
     events:
       - http:
           path: api/users/list
           method: get
           cors: true
           private: true
+
+### AWS RESOURCES
 resources:
   Resources:
     UsersTable:
