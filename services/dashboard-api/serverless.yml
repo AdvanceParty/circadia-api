@@ -10,8 +10,10 @@ plugins:
 
 custom:
   apiVersion: 'v01'
-  usersTableName: circadia-users-${opt:stage, 'dev'}
-  userProfilesTableName: circadia-userProfiles-${opt:stage, 'dev'}
+  apiBasepath: api/${self:custom.apiVersion}
+  usersTable: circadia-${self:custom.apiVersion}-users-${opt:stage, 'dev'}
+  wsConnectionsTable: circadia-${self:custom.apiVersion}-wsclients-${opt:stage, 'dev'}
+  websocketApiName: circadia-${self:custom.apiVersion}-ws-${opt:stage, 'dev'}
   region: ap-southeast-2
   scripts:
     hooks:
@@ -21,11 +23,13 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: ${self:custom.region}
+  websocketsApiName: ${self:custom.websocketApiName}
+  websocketsApiRouteSelectionExpression: $request.body.action
   stage: dev
   environment:
     REGION: ${self:custom.region}
-    USER_TABLE: ${self:custom.usersTableName}
-    USER_PROFILES_TABLE: ${self:custom.userProfilesTableName}
+    USER_TABLE: ${self:custom.usersTable}
+    WS_CONNECTIONS_TABLE: ${self:custom.wsConnectionsTable}
   apiKeys:
     - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
@@ -43,21 +47,21 @@ provider:
             - - 'arn:aws:dynamodb'
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
-              - 'table/${self:custom.usersTableName}'
+              - 'table/${self:custom.wsConnectionsTable}'
         - 'Fn::Join':
             - ':'
             - - 'arn:aws:dynamodb'
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
-              - 'table/${self:custom.userProfilesTableName}'
+              - 'table/${self:custom.usersTable}'
 
 # service-wide environment variables
 environment:
   SLACK_BOT_TOKEN: ${param:SLACK_BOT_TOKEN}
   SLACK_SIGNING_SECRET: ${param:SLACK_SIGNING_SECRET}
   CLIENT_SECRET: ${param:CLIENT_SECRET}
-  TEMP_API_PW: ${param:TEMP_API_PW}
 
+  # functions
 functions:
   #### Handlers for caching external data sources with db ####
   fetchSlackMembers:
@@ -67,7 +71,7 @@ functions:
           rate: rate(6 hours)
           enabled: true
       - http:
-          path: fetchExternal/slack/members
+          path: ${self:custom.apiBasepath}/import/slack/members
           method: get
           cors: true
           private: true
@@ -78,7 +82,7 @@ functions:
           rate: rate(5 minutes)
           enabled: true
       - http:
-          path: fetchExternal/slack/memberPresence
+          path: ${self:custom.apiBasepath}/import/slack/memberPresence
           method: get
           cors: true
           private: true
@@ -87,31 +91,46 @@ functions:
     handler: handlers/webApp.listUsers
     events:
       - http:
-          path: api/users/list
+          path: ${self:custom.apiBasepath}/users/list
           method: get
           cors: true
           private: true
 
+  #### Main Handlers for WebSocket API ####
+  wsConnect:
+    handler: handlers/webSocket.connectHandler
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+    defaultHandler:
+      handler: handlers/websocket.defaultHandler
+      events:
+        - websocket:
+          route: hello
+          routeResponseSelectionExpression: $default
+
 ### AWS RESOURCES
 resources:
   Resources:
-    UsersTable:
+    WSClientsTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
       Properties:
-        TableName: ${self:custom.usersTableName}
+        TableName: ${self:custom.wsConnectionsTable}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: connectionId
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: connectionId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
     UserStatusTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
       Properties:
-        TableName: ${self:custom.userProfilesTableName}
+        TableName: ${self:custom.usersTable}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
