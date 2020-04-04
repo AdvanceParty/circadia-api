@@ -1,7 +1,8 @@
 const { updateItem, scanTable } = require('./crudDyanmodb')
+const USERS_TABLE = process.env.USER_TABLE
 
 const updateUser = (userId, user) => {
-  const TableName = process.env.USER_PROFILES_TABLE
+  const TableName = USERS_TABLE
   const Key = { id: userId }
 
   const expressions = []
@@ -39,7 +40,7 @@ const updateUser = (userId, user) => {
 
 const getActiveUsers = () => {
   const params = {
-    TableName: process.env.USER_PROFILES_TABLE,
+    TableName: USERS_TABLE,
     FilterExpression: 'accountType = :a', // optional
     ExpressionAttributeValues: { ':a': 'active' }, // optional
   }

@@ -14,7 +14,6 @@ const listUsers = async (event, context, callback) => {
     error = createError.InternalServerError('Error retrieving user list')
   }
 
-  console.log(users[0], users.length)
   callback(null, { body: { error, users } })
 }
 

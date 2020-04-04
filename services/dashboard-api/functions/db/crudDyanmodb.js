@@ -26,6 +26,14 @@ const putItem = ({ TableName, Item }) => {
   })
 }
 
+const deleteItem = ({ TableName, Key }) => {
+  return new Promise((resolve, reject) => {
+    dynamodb.delete({ TableName, Key }, (err, data) => {
+      err ? reject(err) : resolve(true)
+    })
+  })
+}
+
 const updateItem = ({
   TableName,
   Key,
@@ -52,6 +60,7 @@ const scanTable = params => {
 
 module.exports.getItem = getItem
 module.exports.putItem = putItem
+module.exports.deleteItem = deleteItem
 module.exports.updateItem = updateItem
 module.exports.scanTable = scanTable
 module.exports.queryTable = queryTable
