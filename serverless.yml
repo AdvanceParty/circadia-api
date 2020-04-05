@@ -1,5 +1,4 @@
-service: circadiaapi
-app: circadiaapi-app
+service: circadia
 org: advanceparty
 
 plugins:
@@ -10,12 +9,16 @@ plugins:
 
 custom:
   version: 'v01'
-  stage: ${opt:stage, 'dev'}
+  corsOrigin: '*'
+  stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, 'ap-southeast-2'}
-  namespace: circadia-${self:custom.version}-${self:custom.stage}
+
+  namespace: ${self:service}-${self:custom.version}-${self:custom.stage}
   apiBasepath: api/${self:custom.version}
+
   dbTable_Users: ${self:custom.namespace}-users
   dbTable_wsConnections: ${self:custom.namespace}-wsConnections
+
   scripts:
     hooks:
       'deploy:finalize': sls invoke -f fetchSlackMembers
@@ -24,17 +27,23 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: ${self:custom.region}
-  stackName: ${self:custom.namespace}-stack
-  apiName: ${self:custom.namespace}-api
-  websocketsApiName: ${self:custom.namespace}-websocket
-  websocketsApiRouteSelectionExpression: $request.body.action
   stage: ${self:custom.stage}
+
+  stackName: ${self:custom.namespace}
+  apiName: ${self:custom.namespace}-apigw
+  websocketsApiName: ${self:custom.namespace}-apigw-websocket
+  websocketsApiRouteSelectionExpression: $request.body.action
+
   environment:
+    CORS_ORIGIN: ${self:custom.corsOrigin}
     REGION: ${self:custom.region}
     USER_TABLE: ${self:custom.dbTable_Users}
     WS_CONNECTIONS_TABLE: ${self:custom.dbTable_wsConnections}
-  apiKeys:
-    - CIRCADIA_CLIENT_KEY
+    WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${self:custom.region}', '.amazonaws.com/', '${self:custom.stage}/']]
+
+    apiKeys:
+      - CIRCADIA_CLIENT_KEY
+
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -72,8 +81,8 @@ environment:
   # functions
 functions:
   #### Handlers for caching external data sources with db ####
-  fetchSlackMembers:
-    handler: handlers/slackFetchers.fetchAllMembers
+  refreshSlackMembers:
+    handler: handler.refreshSlackMembers
     events:
       - schedule:
           rate: rate(6 hours)
@@ -83,8 +92,8 @@ functions:
           method: get
           cors: true
           private: true
-  refreshPresence:
-    handler: handlers/slackFetchers.fetchAllPresence
+  refreshSlackMemberPresence:
+    handler: handler.refreshSlackMemberPresence
     events:
       - schedule:
           rate: rate(5 minutes)
@@ -105,23 +114,23 @@ functions:
           private: true
 
   #### Main Handlers for WebSocket API ####
-  wsConnectionHandler:
-    handler: handlers/wsTest.wsConnectionHandler
-    events:
-      - websocket:
-          route: $connect
-      - websocket:
-          route: $disconnect
-  wsDefaultHandler:
-    handler: handlers/wsTest.wsDefaultHandler
-    events:
-      - websocket:
-          route: $default
-  wsSendMessageHandler:
-    handler: handlers/wsTest.wsSendMessageHandler
-    events:
-      - websocket:
-          route: sendMessage
+  # wsConnectionHandler:
+  #   handler: handlers/wsTest.wsConnectionHandler
+  #   events:
+  #     - websocket:
+  #         route: $connect
+  #     - websocket:
+  #         route: $disconnect
+  # wsDefaultHandler:
+  #   handler: handlers/wsTest.wsDefaultHandler
+  #   events:
+  #     - websocket:
+  #         route: $default
+  # wsSendMessageHandler:
+  #   handler: handlers/wsTest.wsSendMessageHandler
+  #   events:
+  #     - websocket:
+  #         route: sendMessage
 
 ### AWS RESOURCES
 resources:
@@ -140,13 +149,13 @@ resources:
           - AttributeName: 'userId'
             KeyType: 'HASH'
         BillingMode: PAY_PER_REQUEST
-        GlobalSecondaryIndexes:
-          - IndexName: websocket-users-connections-connectionId-GSI
-            KeySchema:
-              - AttributeName: connectionId
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
+        # GlobalSecondaryIndexes:
+        #   - IndexName: websocket-users-connections-connectionId-GSI
+        #     KeySchema:
+        #       - AttributeName: connectionId
+        #         KeyType: HASH
+        #     Projection:
+        #       ProjectionType: ALL
     UserStatusTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
