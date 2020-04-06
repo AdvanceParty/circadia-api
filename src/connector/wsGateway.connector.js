@@ -27,12 +27,22 @@ class WSGatewayConnector {
         })
         .promise()
     } catch (error) {
-      console.error('Unable to generate socket message', error)
       if (error.statusCode === 410) {
         console.log(`Removing stale connector ${connectionId}`)
         await dynamodbConnector.removeSocket(connectionId)
+      } else {
+        console.error('Unable to generate socket message', error)
       }
     }
+  }
+
+  async emitToAll(message = defaultMessage) {
+    const sockets = await dynamodbConnector.getConnectedSockets()
+    console.info(`Broadcasting to all socket connections:`, message)
+    const promises = sockets.Items.map((socket) => {
+      this.generateSocketMessage(socket.connectionId, JSON.stringify(message))
+    })
+    return Promise.all(promises)
   }
 }
 

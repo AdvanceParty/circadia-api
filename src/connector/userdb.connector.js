@@ -47,6 +47,8 @@ class UserDbConnector {
       ExpressionAttributeValues,
     }
 
+    console.info(`Updating ${TableName} record for user ${userId}`, user)
+
     return new Promise((resolve, reject) => {
       this._connector.update(params, (err, data) => {
         err ? reject(err) : resolve(true)

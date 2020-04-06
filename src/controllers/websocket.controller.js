@@ -22,20 +22,14 @@ const defaultSocketHandler = async (event, context) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': CONSTANTS.CORS_ORIGIN,
-      },
+      headers: CONSTANTS.RESPONSE_HEADERS,
       body: 'Default socket response.',
     }
   } catch (err) {
     console.error('Unable to generate default response', err)
     return {
       statusCode: 500,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': CONSTANTS.CORS_ORIGIN,
-      },
+      headers: CONSTANTS.RESPONSE_HEADERS,
       body: 'Default socket response error.',
     }
   }
@@ -49,20 +43,14 @@ const handleSocketConnect = async (event, context) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': CONSTANTS.CORS_ORIGIN,
-      },
+      headers: CONSTANTS.RESPONSE_HEADERS,
       body: 'Socket successfully registered.',
     }
   } catch (err) {
     console.error('Unable to initialize socket connection', err)
     return {
       statusCode: 500,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': CONSTANTS.CORS_ORIGIN,
-      },
+      headers: CONSTANTS.RESPONSE_HEADERS,
       body: 'Unable to register socket.',
     }
   }
@@ -76,20 +64,14 @@ const handleSocketDisconnect = async (event, context) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': CONSTANTS.CORS_ORIGIN,
-      },
+      headers: CONSTANTS.RESPONSE_HEADERS,
       body: 'Socket successfully terminated.',
     }
   } catch (err) {
     console.error('Unable to terminate socket connection', err)
     return {
       statusCode: 500,
-      headers: {
-        'Content-Type': 'text/plain',
-        'Access-Control-Allow-Origin': CONSTANTS.CORS_ORIGIN,
-      },
+      headers: CONSTANTS.RESPONSE_HEADERS,
       body: 'Unable to terminate socket.',
     }
   }

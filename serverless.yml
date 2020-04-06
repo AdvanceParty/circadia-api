@@ -103,7 +103,7 @@ functions:
     handler: handler.refreshSlackMemberPresence
     events:
       - schedule:
-          rate: rate(5 minutes)
+          rate: rate(10 minutes)
           enabled: true
       - http:
           path: ${self:custom.apiBasepath}/external/slack/memberPresence
@@ -119,12 +119,12 @@ functions:
           method: get
           cors: true
           private: true
-  pingSockets:
+  messageWebSocketClients:
     handler: handler.sendMessage
     events:
       - http:
           path: ${self:custom.apiBasepath}/sockets/sendMessage
-          method: get
+          method: post
           cors: true
           private: true
 
@@ -144,11 +144,6 @@ functions:
     events:
       - websocket:
           route: $default
-  # wsSendMessageHandler:
-  #   handler: handler.wsSendMessageHandler
-  #   events:
-  #     - websocket:
-  #         route: sendMessage
 
 ### AWS RESOURCES
 resources:

@@ -10,6 +10,11 @@ const CONSTANTS = {
   OFFLINE_WEBSOCKET_API_ENDPOINT: 'http://localhost:3001',
   DYNAMODB_OPTIONS: {},
   SLACK_TOKEN: process.env.SLACK_BOT_TOKEN,
+  RESPONSE_HEADERS: {
+    'Content-Type': 'text/plain',
+    'Access-Control-Allow-Origin': process.env.CORS_ORIGIN,
+  },
+  SLACK_MAX_REQUESTS_PER_MINUTE: 48,
 }
 
 module.exports = CONSTANTS
