@@ -1,5 +1,5 @@
 'use strict'
-const withMiddleware = require('./middleware')
+const withMiddleware = require('./src/middleware')
 
 // const { greeting } = require('./src/controllers/greeting.controller')
 // const { defaultSocketHandler, handleSocketConnect, handleSocketDisconnect } = require('./src/controllers/websocket.controller')

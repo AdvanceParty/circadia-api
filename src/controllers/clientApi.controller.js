@@ -1,6 +1,4 @@
 const createError = require('http-errors')
-// const withMiddleware = require('./middleware')
-
 // const { getActiveUsers } = require('../functions/db/slackUsers')
 const userdbConnector = require('../connector/userdb.connector')
 

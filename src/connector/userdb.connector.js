@@ -48,7 +48,7 @@ class UserDbConnector {
     }
 
     return new Promise((resolve, reject) => {
-      this._connector.update({ TableName, Key, UpdateExpression, ExpressionAttributeValues }, (err, data) => {
+      this._connector.update(params, (err, data) => {
         err ? reject(err) : resolve(true)
       })
     })
