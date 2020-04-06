@@ -80,7 +80,14 @@ provider:
               - 'table/${self:custom.dbTable_Users}'
 # functions
 functions:
-  #### Handlers for caching external data sources with db ####
+  #### Handlers for interfacing with external data sources ####
+  onSlackEvent:
+    handler: handler.onSlackEvent
+    events:
+      - http:
+          path: ${self:custom.apiBasepath}/external/slack/event
+          method: post
+          cors: true
   refreshSlackMembers:
     handler: handler.refreshSlackMembers
     events:
@@ -88,7 +95,7 @@ functions:
           rate: rate(6 hours)
           enabled: true
       - http:
-          path: ${self:custom.apiBasepath}/import/slack/members
+          path: ${self:custom.apiBasepath}/external/slack/members
           method: get
           cors: true
           private: true
@@ -99,7 +106,7 @@ functions:
           rate: rate(5 minutes)
           enabled: true
       - http:
-          path: ${self:custom.apiBasepath}/import/slack/memberPresence
+          path: ${self:custom.apiBasepath}/external/slack/memberPresence
           method: get
           cors: true
           private: true
