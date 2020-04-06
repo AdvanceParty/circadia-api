@@ -1,16 +1,14 @@
 'use strict'
 
 const CONSTANTS = {
-  // DYNAMODB_SOCKETS_TABLE: process.env.DYNAMODB_SOCKETS_TABLE,
-  // KEYS_URL: process.env.KEYS_URL,
+  OFFLINE: process.env.OFFLINE,
   CORS_ORIGIN: process.env.CORS_ORIGIN,
   REGION: process.env.REGION,
-
   USER_TABLE: process.env.USER_TABLE,
   WS_CONNECTIONS_TABLE: process.env.WS_CONNECTIONS_TABLE,
   WEBSOCKET_API_ENDPOINT: process.env.WEBSOCKET_API_ENDPOINT,
+  OFFLINE_WEBSOCKET_API_ENDPOINT: 'http://localhost:3001',
   DYNAMODB_OPTIONS: {},
-
   SLACK_TOKEN: process.env.SLACK_BOT_TOKEN,
 }
 

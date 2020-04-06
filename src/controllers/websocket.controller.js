@@ -1,6 +1,6 @@
 'use strict'
 
-const apigatewayConnector = require('./../connector/apigateway.connector')
+const apigatewayConnector = require('../connector/wsGateway.connector')
 const dynamodbConnector = require('../connector/wsdb.connector')
 const CONSTANTS = require('./../constants')
 
@@ -44,9 +44,8 @@ const defaultSocketHandler = async (event, context) => {
 const handleSocketConnect = async (event, context) => {
   try {
     const connectionId = event.requestContext.connectionId
-    const connectionType = event.queryStringParameters.connectionType
 
-    await dynamodbConnector.registerSocket(connectionId, connectionType)
+    await dynamodbConnector.registerSocket(connectionId)
 
     return {
       statusCode: 200,

@@ -1,12 +1,13 @@
 'use strict'
 
 const aws = require('aws-sdk')
-
 const CONSTANTS = require('../constants')
+const DB_OPTIONS = CONSTANTS.DYNAMODB_OPTIONS
+const TableName = CONSTANTS.WS_CONNECTIONS_TABLE
 
 class WsDbConnector {
   constructor() {
-    this._connector = new aws.DynamoDB.DocumentClient(CONSTANTS.DYNAMODB_OPTIONS)
+    this._connector = new aws.DynamoDB.DocumentClient(DB_OPTIONS)
   }
 
   get connector() {
@@ -15,25 +16,30 @@ class WsDbConnector {
 
   async registerSocket(connectionId) {
     const socketParams = {
-      TableName: CONSTANTS.DYNAMODB_SOCKETS_TABLE,
+      TableName,
       Item: {
         connectionId,
-        type: connectionType,
       },
     }
+
+    console.log(socketParams)
 
     return await this._connector.put(socketParams).promise()
   }
 
   async removeSocket(connectionId) {
     const socketParams = {
-      TableName: CONSTANTS.DYNAMODB_SOCKETS_TABLE,
+      TableName,
       Key: {
         connectionId,
       },
     }
 
     return await this._connector.delete(socketParams).promise()
+  }
+
+  async getConnectedSockets() {
+    return await this._connector.scan({ TableName }).promise()
   }
 }
 

@@ -1,14 +1,14 @@
 'use strict'
 
 const aws = require('aws-sdk')
-
-const CONSTANTS = require('./../constants')
 const dynamodbConnector = require('./wsdb.connector')
+const CONSTANTS = require('../constants')
+const ENDPOINT = CONSTANTS.OFFLINE ? CONSTANTS.OFFLINE_WEBSOCKET_API_ENDPOINT : CONSTANTS.WEBSOCKET_API_ENDPOINT
 
-class ApiGatewayConnector {
+class WSGatewayConnector {
   constructor() {
     const CONNECTOR_OPTS = {
-      endpoint: CONSTANTS.WEBSOCKET_API_ENDPOINT,
+      endpoint: ENDPOINT,
     }
     this._connector = new aws.ApiGatewayManagementApi(CONNECTOR_OPTS)
   }
@@ -18,6 +18,7 @@ class ApiGatewayConnector {
   }
 
   async generateSocketMessage(connectionId, data) {
+    console.log(`API ENDPOINT: ${ENDPOINT}`)
     try {
       return await this._connector
         .postToConnection({
@@ -35,5 +36,5 @@ class ApiGatewayConnector {
   }
 }
 
-const APIGW_CONNECTOR = new ApiGatewayConnector()
+const APIGW_CONNECTOR = new WSGatewayConnector()
 module.exports = APIGW_CONNECTOR

@@ -36,6 +36,16 @@ provider:
     USER_TABLE: ${self:custom.dbTable_Users}
     WS_CONNECTIONS_TABLE: ${self:custom.dbTable_wsConnections}
     WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${self:custom.region}', '.amazonaws.com/', '${self:custom.stage}/']]
+    # WEBSOCKET_API_ENDPOINT:
+    #   - 'Fn::Join':
+    #       - ''
+    #       - - 'https://'
+    #         - Ref: 'WebsocketsApi'
+    #         - '.execute-api.'
+    #         - ${self:custom.region}
+    #         - '.amazonaws.com/'
+    #         - ${self:custom.stage}
+    #         - '/'
     SLACK_BOT_TOKEN: ${param:SLACK_BOT_TOKEN}
     SLACK_SIGNING_SECRET: ${param:SLACK_SIGNING_SECRET}
     CLIENT_SECRET: ${param:CLIENT_SECRET}
@@ -102,25 +112,36 @@ functions:
           method: get
           cors: true
           private: true
+  pingSockets:
+    handler: handler.sendMessage
+    events:
+      - http:
+          path: ${self:custom.apiBasepath}/sockets/sendMessage
+          method: get
+          cors: true
+          private: true
 
   #### Main Handlers for WebSocket API ####
   wsConnectionHandler:
-    handler: handlers/wsTest.wsConnectionHandler
+    handler: handler.handleSocketConnect
     events:
       - websocket:
           route: $connect
+  wsDisconnectionHandler:
+    handler: handler.handleSocketDisconnect
+    events:
       - websocket:
           route: $disconnect
   wsDefaultHandler:
-    handler: handlers/wsTest.wsDefaultHandler
+    handler: handler.defaultSocketHandler
     events:
       - websocket:
           route: $default
-  wsSendMessageHandler:
-    handler: handlers/wsTest.wsSendMessageHandler
-    events:
-      - websocket:
-          route: sendMessage
+  # wsSendMessageHandler:
+  #   handler: handler.wsSendMessageHandler
+  #   events:
+  #     - websocket:
+  #         route: sendMessage
 
 ### AWS RESOURCES
 resources:
@@ -149,3 +170,8 @@ resources:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+logs:
+  restApi:
+    level: INFO
+  websocket:
+    level: INFO
