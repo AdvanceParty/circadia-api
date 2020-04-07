@@ -11,9 +11,10 @@ const CONSTANTS = {
   DYNAMODB_OPTIONS: {},
   SLACK_TOKEN: process.env.SLACK_BOT_TOKEN,
   RESPONSE_HEADERS: {
-    'Content-Type': 'text/plain',
+    // 'Content-Type': 'text/plain',
     'Access-Control-Allow-Origin': process.env.CORS_ORIGIN,
     'Access-Control-Allow-Credentials': true,
+    'Access-Control-Allow-Headers': 'X-Requested-With',
   },
   SLACK_MAX_REQUESTS_PER_MINUTE: 48,
 }

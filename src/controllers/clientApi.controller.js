@@ -14,14 +14,31 @@ const listUsers = async (event, context, callback) => {
     error = createError.InternalServerError('Error retrieving user list')
   }
 
-  return { body: { error, users } }
+  callback({
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': process.env.CORS_ORIGIN,
+      'Access-Control-Allow-Credentials': true,
+      'Access-Control-Allow-Headers': 'X-Requested-With',
+    },
+    body: JSON.stringify({ error, users }),
+  })
+}
+
+const ping = (event, context, callback) => {
+  return { body: { name: 'foo' } }
 }
 
 const sendMessage = async (event, context, callback) => {
   // create a payload in the form {event:str, message:str/obj}
   // wsGatewayConnector.emitToAll({ event, message })
-  return { status: 200, headers: CONSTANTS.RESPONSE_HEADERS, body: 'METHOD NOT IMPLEMENTED' }
+  return {
+    status: 200,
+    headers: CONSTANTS.RESPONSE_HEADERS,
+    body: 'METHOD NOT IMPLEMENTED',
+  }
 }
 
 module.exports.listUsers = listUsers
 module.exports.sendMessage = sendMessage
+module.exports.ping = ping

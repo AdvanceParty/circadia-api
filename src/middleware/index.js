@@ -9,7 +9,7 @@ const {
 
 const stringifyResponse = require('./stringifyResponse')
 
-const withMiddleware = handler =>
+const withMiddleware = (handler) =>
   middy(handler)
     .use(cors())
     .use(jsonBodyParser())

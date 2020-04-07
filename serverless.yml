@@ -36,19 +36,12 @@ provider:
     USER_TABLE: ${self:custom.dbTable_Users}
     WS_CONNECTIONS_TABLE: ${self:custom.dbTable_wsConnections}
     WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${self:custom.region}', '.amazonaws.com/', '${self:custom.stage}/']]
-    # WEBSOCKET_API_ENDPOINT:
-    #   - 'Fn::Join':
-    #       - ''
-    #       - - 'https://'
-    #         - Ref: 'WebsocketsApi'
-    #         - '.execute-api.'
-    #         - ${self:custom.region}
-    #         - '.amazonaws.com/'
-    #         - ${self:custom.stage}
-    #         - '/'
     SLACK_BOT_TOKEN: ${param:SLACK_BOT_TOKEN}
     SLACK_SIGNING_SECRET: ${param:SLACK_SIGNING_SECRET}
     CLIENT_SECRET: ${param:CLIENT_SECRET}
+    AUTH0_DOMAIN: advanceparty.au.auth0.com
+    AUTH0_API_ID: circadia-aws-api
+    JWKS_URI: https://advanceparty.au.auth0.com/.well-known/jwks.json
   apiKeys:
     - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
@@ -80,6 +73,37 @@ provider:
               - 'table/${self:custom.dbTable_Users}'
 # functions
 functions:
+  #### Main Handlers for Web Application ####
+  auth:
+    handler: handler.auth
+  listUsers:
+    handler: handler.listUsers
+    events:
+      - http:
+          path: ${self:custom.apiBasepath}/users/list
+          method: post
+          authorizer:
+            name: auth
+          cors: true
+  ping:
+    handler: handler.ping
+    events:
+      - http:
+          path: ${self:custom.apiBasepath}/ping
+          method: post
+          cors: true
+      - http:
+          path: ${self:custom.apiBasepath}/ping
+          method: get
+          cors: true
+  messageWebSocketClients:
+    handler: handler.sendMessage
+    events:
+      - http:
+          path: ${self:custom.apiBasepath}/sockets/sendMessage
+          method: post
+          cors: true
+          private: true
   #### Handlers for interfacing with external data sources ####
   onSlackEvent:
     handler: handler.onSlackEvent
@@ -98,7 +122,6 @@ functions:
           path: ${self:custom.apiBasepath}/external/slack/members
           method: get
           cors: true
-          private: true
   refreshSlackMemberPresence:
     handler: handler.refreshSlackMemberPresence
     events:
@@ -109,25 +132,6 @@ functions:
           path: ${self:custom.apiBasepath}/external/slack/memberPresence
           method: get
           cors: true
-          private: true
-  #### Main Handlers for Web Application ####
-  listUsers:
-    handler: handler.listUsers
-    events:
-      - http:
-          path: ${self:custom.apiBasepath}/users/list
-          method: get
-          cors: true
-          private: true
-  messageWebSocketClients:
-    handler: handler.sendMessage
-    events:
-      - http:
-          path: ${self:custom.apiBasepath}/sockets/sendMessage
-          method: post
-          cors: true
-          private: true
-
   #### Main Handlers for WebSocket API ####
   wsConnectionHandler:
     handler: handler.handleSocketConnect
