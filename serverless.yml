@@ -81,9 +81,7 @@ functions:
     events:
       - http:
           path: ${self:custom.apiBasepath}/users/list
-          method: post
-          authorizer:
-            name: auth
+          method: get
           cors: true
   ping:
     handler: handler.ping

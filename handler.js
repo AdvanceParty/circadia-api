@@ -15,15 +15,14 @@ const {
 
 const { listUsers, sendMessage, ping } = require('./src/controllers/clientApi.controller')
 
-module.exports.refreshSlackMemberPresence = withMiddleware(refreshSlackMemberPresence)
-module.exports.refreshSlackMembers = withMiddleware(refreshSlackMembers)
-module.exports.onSlackEvent = withMiddleware(onSlackEvent)
-module.exports.sendMessage = withMiddleware(sendMessage)
+exports.refreshSlackMemberPresence = withMiddleware(refreshSlackMemberPresence)
+exports.refreshSlackMembers = withMiddleware(refreshSlackMembers)
+exports.onSlackEvent = withMiddleware(onSlackEvent)
+exports.sendMessage = withMiddleware(sendMessage)
 
-module.exports.handleSocketConnect = handleSocketConnect
-module.exports.handleSocketDisconnect = handleSocketDisconnect
-module.exports.defaultSocketHandler = defaultSocketHandler
+exports.handleSocketConnect = handleSocketConnect
+exports.handleSocketDisconnect = handleSocketDisconnect
+exports.defaultSocketHandler = defaultSocketHandler
 
-module.exports.listUsers = withMiddleware(listUsers)
-module.exports.ping = withMiddleware(ping)
-// module.exports.listUsers = listUsers
+exports.listUsers = withMiddleware(listUsers)
+exports.ping = withMiddleware(ping)

@@ -14,15 +14,18 @@ const listUsers = async (event, context, callback) => {
     error = createError.InternalServerError('Error retrieving user list')
   }
 
-  callback({
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': process.env.CORS_ORIGIN,
-      'Access-Control-Allow-Credentials': true,
-      'Access-Control-Allow-Headers': 'X-Requested-With',
-    },
-    body: JSON.stringify({ error, users }),
-  })
+  return { body: { error, users } }
+  // callback({
+  //   status: 200,
+  //   headers: {
+  //     'Access-Control-Allow-Methods': 'PUT,PATCH,DELETE,GET,POST',
+  //     'Access-Control-Allow-Headers':
+  //       'API-Key,Content-Type,If-Modified-Since,Cache-Control',
+  //     'Access-Control-Allow-Origin': '*',
+  //     'Access-Control-Allow-Credentials': true,
+  //   },
+  //   body: JSON.stringify({ error, users }),
+  // })
 }
 
 const ping = (event, context, callback) => {

@@ -114,7 +114,11 @@ const onUserChange = async (event) => {
 
   try {
     await userdbConnector.updateUser(event.user.id, record)
-    wsGatewayConnector.emitToAll({ event: 'user_profile_change', user: event.user.id, data: record.profile })
+    wsGatewayConnector.emitToAll({
+      event: 'user_profile_change',
+      user: event.user.id,
+      data: record.profile,
+    })
   } catch (e) {
     console.error(e)
   }
@@ -131,7 +135,11 @@ const onDndUpdatedUser = async (event) => {
 
   try {
     await userdbConnector.updateUser(user, record)
-    wsGatewayConnector.emitToAll({ event: 'user_dnd_change', user, data: record.dndStatus })
+    wsGatewayConnector.emitToAll({
+      event: 'user_dnd_change',
+      user,
+      data: record.dndStatus,
+    })
   } catch (e) {
     console.error(e)
   }
@@ -141,11 +149,16 @@ const onDndUpdatedUser = async (event) => {
 const updateUserPresenceIfChanged = async (user) => {
   try {
     const slackData = await web.users.getPresence({ user: user.id })
+
     if (presenceIsDifferent(user, slackData)) {
       const record = new User()
       record.presence = new UserPresence().setData(slackData)
       userdbConnector.updateUser(user.id, record)
-      wsGatewayConnector.emitToAll({ event: 'user_presence_change', user: user.id, data: record.presence })
+      wsGatewayConnector.emitToAll({
+        event: 'user_presence_change',
+        user: user.id,
+        data: record.presence,
+      })
     }
   } catch (e) {
     console.error(`Error fetching presence info from member ${user.id}`, e)
@@ -153,7 +166,7 @@ const updateUserPresenceIfChanged = async (user) => {
 }
 
 const presenceIsDifferent = (user, slackData) => {
-  const dbState = user.presence.presence
+  const dbState = user.presence ? user.presence.presence : null
   const slackState = slackData.presence
   return dbState !== slackState
 }
