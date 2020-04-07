@@ -83,17 +83,7 @@ functions:
           path: ${self:custom.apiBasepath}/users/list
           method: get
           cors: true
-  ping:
-    handler: handler.ping
-    events:
-      - http:
-          path: ${self:custom.apiBasepath}/ping
-          method: post
-          cors: true
-      - http:
-          path: ${self:custom.apiBasepath}/ping
-          method: get
-          cors: true
+          private: true
   messageWebSocketClients:
     handler: handler.sendMessage
     events:
@@ -120,6 +110,7 @@ functions:
           path: ${self:custom.apiBasepath}/external/slack/members
           method: get
           cors: true
+          private: true
   refreshSlackMemberPresence:
     handler: handler.refreshSlackMemberPresence
     events:
@@ -130,6 +121,7 @@ functions:
           path: ${self:custom.apiBasepath}/external/slack/memberPresence
           method: get
           cors: true
+          private: true
   #### Main Handlers for WebSocket API ####
   wsConnectionHandler:
     handler: handler.handleSocketConnect
