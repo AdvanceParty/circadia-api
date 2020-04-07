@@ -13,6 +13,7 @@ const CONSTANTS = {
   RESPONSE_HEADERS: {
     'Content-Type': 'text/plain',
     'Access-Control-Allow-Origin': process.env.CORS_ORIGIN,
+    'Access-Control-Allow-Credentials': true,
   },
   SLACK_MAX_REQUESTS_PER_MINUTE: 48,
 }
