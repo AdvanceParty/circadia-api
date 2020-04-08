@@ -116,7 +116,7 @@ const onUserChange = async (event) => {
     await userdbConnector.updateUser(event.user.id, record)
     wsGatewayConnector.emitToAll({
       event: 'user_profile_change',
-      user: event.user.id,
+      userId: event.user.id,
       data: record.profile,
     })
   } catch (e) {
@@ -137,7 +137,7 @@ const onDndUpdatedUser = async (event) => {
     await userdbConnector.updateUser(user, record)
     wsGatewayConnector.emitToAll({
       event: 'user_dnd_change',
-      user,
+      userId: user,
       data: record.dndStatus,
     })
   } catch (e) {
@@ -156,7 +156,7 @@ const updateUserPresenceIfChanged = async (user) => {
       userdbConnector.updateUser(user.id, record)
       wsGatewayConnector.emitToAll({
         event: 'user_presence_change',
-        user: user.id,
+        userId: user.id,
         data: record.presence,
       })
     }
