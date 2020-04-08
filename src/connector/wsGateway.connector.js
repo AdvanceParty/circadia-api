@@ -3,7 +3,8 @@
 const aws = require('aws-sdk')
 const dynamodbConnector = require('./wsdb.connector')
 const CONSTANTS = require('../constants')
-const ENDPOINT = CONSTANTS.OFFLINE ? CONSTANTS.OFFLINE_WEBSOCKET_API_ENDPOINT : CONSTANTS.WEBSOCKET_API_ENDPOINT
+// const ENDPOINT = CONSTANTS.OFFLINE ? CONSTANTS.OFFLINE_WEBSOCKET_API_ENDPOINT : CONSTANTS.WEBSOCKET_API_ENDPOINT
+const ENDPOINT = CONSTANTS.WEBSOCKET_API_ENDPOINT
 
 class WSGatewayConnector {
   constructor() {
