@@ -4,13 +4,15 @@ const aws = require('aws-sdk')
 const dynamodbConnector = require('./wsdb.connector')
 const CONSTANTS = require('../constants')
 // const ENDPOINT = CONSTANTS.OFFLINE ? CONSTANTS.OFFLINE_WEBSOCKET_API_ENDPOINT : CONSTANTS.WEBSOCKET_API_ENDPOINT
-const ENDPOINT = CONSTANTS.WEBSOCKET_API_ENDPOINT
+const ENDPOINT = 'http://localhost:3001' //CONSTANTS.WEBSOCKET_API_ENDPOINT
 
 class WSGatewayConnector {
   constructor() {
     const CONNECTOR_OPTS = {
+      apiVersion: '2029',
       endpoint: ENDPOINT,
     }
+    console.log(CONNECTOR_OPTS.endpoint)
     this._connector = new aws.ApiGatewayManagementApi(CONNECTOR_OPTS)
   }
 
@@ -20,6 +22,9 @@ class WSGatewayConnector {
 
   async generateSocketMessage(connectionId, data) {
     console.log(`API ENDPOINT: ${ENDPOINT}`)
+    console.log(
+      `process.env.WEBSOCKET_API_ENDPOINT: ${process.env.WEBSOCKET_API_ENDPOINT}`,
+    )
     try {
       return await this._connector
         .postToConnection({
