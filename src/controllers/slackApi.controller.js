@@ -37,12 +37,32 @@ const refreshSlackMembers = async (event, context, callback) => {
 const refreshSlackMemberPresence = async (event, context, callback) => {
   users = await userdbConnector.getActiveUsers()
 
+  Promise.all(
+    users.map(async (user) => {
+      const slackData = await web.users.getPresence({ user: user.id })
+
+      if (presenceIsDifferent(user, slackData)) {
+        const record = new User()
+        record.presence = new UserPresence().setData(slackData)
+        userdbConnector.updateUser(user.id, record)
+        wsGatewayConnector.emitToAll({
+          event: 'user_presence_change',
+          userId: user.id,
+          data: record.presence,
+        })
+      }
+    }),
+    // .then(result => {
+    // })
+  )
+
   // use the throttler class to queue up all the calls
   // and ensure we don't exceed the API rate limit
-  new Throttler({
-    items: users,
-    requestFunction: updateUserPresenceIfChanged,
-  }).start()
+
+  // const throttler = new Throttler({
+  //   items: users,
+  //   requestFunction: updateUserPresenceIfChanged,
+  // })
 
   // callback to request originator
   return { body: { result, error } }
@@ -148,24 +168,37 @@ const onDndUpdatedUser = async (event) => {
   return { user }
 }
 
-const updateUserPresenceIfChanged = async (user) => {
-  try {
-    const slackData = await web.users.getPresence({ user: user.id })
+// const updateUserPresenceIfChanged = async (user) => {
+//   if (presenceIsDifferent(user, slackData)) {
+//     const record = new User()
+//     record.presence = new UserPresence().setData(slackData)
+//     userdbConnector.updateUser(user.id, record)
+//     wsGatewayConnector.emitToAll({
+//       event: 'user_presence_change',
+//       userId: user.id,
+//       data: record.presence,
+//     })
+//   }
+// }
 
-    if (presenceIsDifferent(user, slackData)) {
-      const record = new User()
-      record.presence = new UserPresence().setData(slackData)
-      userdbConnector.updateUser(user.id, record)
-      wsGatewayConnector.emitToAll({
-        event: 'user_presence_change',
-        userId: user.id,
-        data: record.presence,
-      })
-    }
-  } catch (e) {
-    console.error(`Error fetching presence info from member ${user.id}`, e)
-  }
-}
+// const updateUserPresenceIfChanged = async (user) => {
+//   try {
+//     const slackData = await web.users.getPresence({ user: user.id })
+
+//     if (presenceIsDifferent(user, slackData)) {
+//       const record = new User()
+//       record.presence = new UserPresence().setData(slackData)
+//       userdbConnector.updateUser(user.id, record)
+//       wsGatewayConnector.emitToAll({
+//         event: 'user_presence_change',
+//         userId: user.id,
+//         data: record.presence,
+//       })
+//     }
+//   } catch (e) {
+//     console.error(`Error fetching presence info from member ${user.id}`, e)
+//   }
+// }
 
 const presenceIsDifferent = (user, slackData) => {
   const dbState = user.presence ? user.presence.presence : null

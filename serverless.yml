@@ -110,6 +110,7 @@ functions:
           private: true
   refreshSlackMemberPresence:
     handler: handler.refreshSlackMemberPresence
+    timeout: 30
     events:
       - schedule:
           rate: rate(10 minutes)

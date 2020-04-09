@@ -4,7 +4,7 @@
   "description": "Serverless API for Circadia, The Royals dashboard tool",
   "main": "handler.js",
   "scripts": {
-    "start": "sls offline --no-auth --env local",
+    "start": "sls offline --noAuth --env local",
     "deploy": "sls deploy"
   },
   "author": "Gil Fewster <gil@theroyals.com.au> (http://theroyals.com.au/)",
