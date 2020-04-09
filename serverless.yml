@@ -36,9 +36,6 @@ provider:
     USER_TABLE: ${self:custom.dbTable_Users}
     WS_CONNECTIONS_TABLE: ${self:custom.dbTable_wsConnections}
     WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${self:custom.region}', '.amazonaws.com/', '${self:custom.stage}/']]
-    SLACK_BOT_TOKEN: ${param:SLACK_BOT_TOKEN}
-    SLACK_SIGNING_SECRET: ${param:SLACK_SIGNING_SECRET}
-    CLIENT_SECRET: ${param:CLIENT_SECRET}
     AUTH0_DOMAIN: advanceparty.au.auth0.com
     AUTH0_API_ID: circadia-aws-api
     JWKS_URI: https://advanceparty.au.auth0.com/.well-known/jwks.json

@@ -14,7 +14,9 @@ const web = new WebClient(CONSTANTS.SLACK_TOKEN)
 
 const refreshSlackMembers = async (event, context, callback) => {
   const slackData = await web.users.list()
+  console.log('Get member list')
   const { members } = slackData
+  console.log('   Members count ' + members.length)
 
   try {
     const updateUserPromises = members.map((member) => {
@@ -27,9 +29,9 @@ const refreshSlackMembers = async (event, context, callback) => {
   } catch (e) {
     console.error(`error updating slack users: ${e.message}`)
   }
-
+  console.log('Refreshing Member Presence')
   // callback(null, { body: { recordCount: activeMembers.length } })
-  return { body: { recordCount: activeMembers.length } }
+  return { body: 'Refreshing member list' }
 }
 
 const refreshSlackMemberPresence = async (event, context, callback) => {
