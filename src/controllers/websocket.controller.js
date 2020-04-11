@@ -16,7 +16,10 @@ const defaultSocketHandler = async (event, context) => {
         await apigatewayConnector.generateSocketMessage(connectionId, pingResponse)
         break
       default:
-        const invalidResponse = JSON.stringify({ action: 'ERROR', error: 'Invalid request' })
+        const invalidResponse = JSON.stringify({
+          action: 'ERROR',
+          error: 'Invalid request',
+        })
         await apigatewayConnector.generateSocketMessage(connectionId, invalidResponse)
     }
 

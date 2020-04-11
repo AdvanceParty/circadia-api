@@ -14,9 +14,7 @@ const web = new WebClient(CONSTANTS.SLACK_TOKEN)
 
 const refreshSlackMembers = async (event, context, callback) => {
   const slackData = await web.users.list()
-  console.log('Get member list')
   const { members } = slackData
-  console.log('   Members count ' + members.length)
 
   try {
     const updateUserPromises = members.map((member) => {
@@ -29,8 +27,6 @@ const refreshSlackMembers = async (event, context, callback) => {
   } catch (e) {
     console.error(`error updating slack users: ${e.message}`)
   }
-  console.log('Refreshing Member Presence')
-  // callback(null, { body: { recordCount: activeMembers.length } })
   return { body: 'Refreshing member list' }
 }
 
@@ -52,20 +48,9 @@ const refreshSlackMemberPresence = async (event, context, callback) => {
         })
       }
     }),
-    // .then(result => {
-    // })
   )
 
-  // use the throttler class to queue up all the calls
-  // and ensure we don't exceed the API rate limit
-
-  // const throttler = new Throttler({
-  //   items: users,
-  //   requestFunction: updateUserPresenceIfChanged,
-  // })
-
-  // callback to request originator
-  return { body: { result, error } }
+  return { body: 'Refreshing Member Presences' }
 }
 
 // import verifyMessageOrigin from './_utils/verifyMessageOrigin';
@@ -113,7 +98,7 @@ const onSlackEvent = async (event, context, callback) => {
         // overwrite normal body object with specific format
         // required by slack enddpoint validation.
         // see https://api.slack.com/events/url_verification
-        body = handleSlackEndpointVerification(eventObj)
+        body = eventObj.challenge
         break
       default:
         console.warn(`Ignoring ${type} event from Slack`)
@@ -124,10 +109,6 @@ const onSlackEvent = async (event, context, callback) => {
   }
 
   return { body }
-}
-
-const handleSlackEndpointVerification = ({ challenge }) => {
-  return { challenge }
 }
 
 const onUserChange = async (event) => {

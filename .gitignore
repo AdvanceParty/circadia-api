@@ -1,3 +1,5 @@
+public_key
+auth0.json
 
 # local environment vars
 .env

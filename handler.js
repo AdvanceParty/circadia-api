@@ -1,6 +1,7 @@
 'use strict'
 const withMiddleware = require('./src/middleware')
 
+const { auth } = require('./src/controllers/auth.controller')
 const {
   defaultSocketHandler,
   handleSocketConnect,
@@ -24,3 +25,4 @@ exports.listUsers = withMiddleware(listUsers)
 exports.handleSocketConnect = handleSocketConnect
 exports.handleSocketDisconnect = handleSocketDisconnect
 exports.defaultSocketHandler = defaultSocketHandler
+exports.auth = auth

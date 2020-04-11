@@ -36,9 +36,8 @@ provider:
     USER_TABLE: ${self:custom.dbTable_Users}
     WS_CONNECTIONS_TABLE: ${self:custom.dbTable_wsConnections}
     WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${self:custom.region}', '.amazonaws.com/', '${self:custom.stage}/']]
-    AUTH0_DOMAIN: advanceparty.au.auth0.com
-    AUTH0_API_ID: circadia-aws-api
-    JWKS_URI: https://advanceparty.au.auth0.com/.well-known/jwks.json
+    AUTH0_CLIENT_ID: ${file(./auth0.json):AUTH0_CLIENT_ID}
+    AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
   apiKeys:
     - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
@@ -73,6 +72,7 @@ functions:
   #### Main Handlers for Web Application ####
   auth:
     handler: handler.auth
+    cors: true
   listUsers:
     handler: handler.listUsers
     events:
@@ -80,7 +80,7 @@ functions:
           path: ${self:custom.apiBasepath}/users/list
           method: get
           cors: true
-          private: true
+          authorizer: auth
   messageWebSocketClients:
     handler: handler.sendMessage
     events:
@@ -88,7 +88,7 @@ functions:
           path: ${self:custom.apiBasepath}/sockets/sendMessage
           method: post
           cors: true
-          private: true
+          authorizer: auth
   #### Handlers for interfacing with external data sources ####
   onSlackEvent:
     handler: handler.onSlackEvent
@@ -140,6 +140,27 @@ functions:
 ### AWS RESOURCES
 resources:
   Resources:
+    # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+    GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: EXPIRED_TOKEN
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+    AuthFailureGatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
     WSClientsTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
