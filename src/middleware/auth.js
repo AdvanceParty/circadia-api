@@ -24,7 +24,7 @@
 
 const jwt = require('jsonwebtoken')
 const jwksClient = require('jwks-rsa')
-const auth0Domain = process.env.AUTH0_DOMAIN
+// const auth0Domain = process.env.AUTH0_DOMAIN
 
 const util = require('util')
 
@@ -36,6 +36,9 @@ const client = jwksClient({
 })
 
 module.exports = (event, context, callback) => {
+  console.log('AUTH')
+  console.log(event)
+  console.log('-------------')
   const token = getToken(event)
 
   const decoded = jwt.decode(token, { complete: true })

@@ -38,8 +38,6 @@ provider:
     WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${self:custom.region}', '.amazonaws.com/', '${self:custom.stage}/']]
     AUTH0_CLIENT_ID: ${file(./auth0.json):AUTH0_CLIENT_ID}
     AUTH0_CLIENT_PUBLIC_KEY: ${file(./public_key)}
-  apiKeys:
-    - CIRCADIA_CLIENT_KEY
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -107,7 +105,7 @@ functions:
           path: ${self:custom.apiBasepath}/external/slack/members
           method: get
           cors: true
-          private: true
+          authorizer: auth
   refreshSlackMemberPresence:
     handler: handler.refreshSlackMemberPresence
     timeout: 30
@@ -119,7 +117,7 @@ functions:
           path: ${self:custom.apiBasepath}/external/slack/memberPresence
           method: get
           cors: true
-          private: true
+          authorizer: auth
   #### Main Handlers for WebSocket API ####
   wsConnectionHandler:
     handler: handler.handleSocketConnect
