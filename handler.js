@@ -22,7 +22,7 @@ exports.onSlackEvent = withMiddleware(onSlackEvent)
 exports.sendMessage = withMiddleware(sendMessage)
 exports.listUsers = withMiddleware(listUsers)
 
-exports.handleSocketConnect = handleSocketConnect
-exports.handleSocketDisconnect = handleSocketDisconnect
-exports.defaultSocketHandler = defaultSocketHandler
+exports.handleSocketConnect = withMiddleware(handleSocketConnect)
+exports.handleSocketDisconnect = withMiddleware(handleSocketDisconnect)
+exports.defaultSocketHandler = withMiddleware(defaultSocketHandler)
 exports.auth = auth
