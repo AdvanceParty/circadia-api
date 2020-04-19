@@ -31,26 +31,31 @@ const refreshSlackMembers = async (event, context, callback) => {
 }
 
 const refreshSlackMemberPresence = async (event, context, callback) => {
+  console.log('refreshSlackMemberPresence')
   users = await userdbConnector.getActiveUsers()
-
-  Promise.all(
-    users.map(async (user) => {
-      const slackData = await web.users.getPresence({ user: user.id })
-
-      if (presenceIsDifferent(user, slackData)) {
-        const record = new User()
-        record.presence = new UserPresence().setData(slackData)
-        userdbConnector.updateUser(user.id, record)
-        wsGatewayConnector.emitToAll({
-          event: 'user_presence_change',
-          userId: user.id,
-          data: record.presence,
-        })
-      }
-    }),
-  )
-
+  const throttler = new Throttler({
+    items: users,
+    requestsPerMinute: CONSTANTS.SLACK_MAX_REQUESTS_PER_MINUTE,
+    requestFunction: refreshSlackMemberPresence_throttled,
+  })
+  throttler.start()
   return { body: 'Refreshing Member Presences' }
+}
+
+const refreshSlackMemberPresence_throttled = async (user) => {
+  const slackData = await web.users.getPresence({ user: user.id })
+  console.log(` > checking user id ${user.id}`)
+  if (presenceIsDifferent(user, slackData)) {
+    console.log(`  > Update presence for user id ${user.id}`)
+    const record = new User()
+    record.presence = new UserPresence().setData(slackData)
+    await userdbConnector.updateUser(user.id, record)
+    await wsGatewayConnector.emitToAll({
+      event: 'user_presence_change',
+      userId: user.id,
+      data: record.presence,
+    })
+  }
 }
 
 // import verifyMessageOrigin from './_utils/verifyMessageOrigin';
