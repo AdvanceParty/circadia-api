@@ -2,7 +2,12 @@ const CONSTANTS = require('../constants')
 const { SLACK_MAX_REQUESTS_PER_MINUTE } = CONSTANTS || 45
 
 class Throttler {
-  constructor({ items, requestFunction, requestsPerMinute = SLACK_MAX_REQUESTS_PER_MINUTE, onComplete = null }) {
+  constructor({
+    items,
+    requestFunction,
+    requestsPerMinute = SLACK_MAX_REQUESTS_PER_MINUTE,
+    onComplete = null,
+  }) {
     this.items = [...items]
     this.requestFunction = requestFunction
     this.interval = Math.floor(60000 / requestsPerMinute)
@@ -27,9 +32,12 @@ class Throttler {
   }
 
   start() {
-    if (!this.running) {
-      this._next
-    }
+    return new Promise((resolve, reject) => {
+      if (!this.running) {
+        this._next
+      }
+      resolve(true)
+    })
   }
 
   get length() {

@@ -38,7 +38,14 @@ const refreshSlackMemberPresence = async (event, context, callback) => {
     requestsPerMinute: CONSTANTS.SLACK_MAX_REQUESTS_PER_MINUTE,
     requestFunction: refreshSlackMemberPresence_throttled,
   })
-  throttler.start()
+
+  // IMPORTANT: Yeah, it's strange to promisify throttle.start()
+  // and let it resolve immediately, but we're not interested in when
+  // it finishes. Using Promise.all() in the lambda function means that the
+  // throttler will be run as a background task and the function
+  // can compleete without waiting for the api calls to finish
+
+  Promise.all(throttler.start())
   return { body: 'Refreshing Member Presences' }
 }
 
