@@ -45,11 +45,12 @@ const refreshSlackMemberPresence = async (event, context, callback) => {
   // throttler will be run as a background task and the function
   // can compleete without waiting for the api calls to finish
 
-  Promise.all(throttler.start())
+  Promise.all([throttler.start()])
   return { body: 'Refreshing Member Presences' }
 }
 
 const refreshSlackMemberPresence_throttled = async (user) => {
+  // console.log('user', user)
   const slackData = await web.users.getPresence({ user: user.id })
   console.log(` > checking user id ${user.id}`)
   if (presenceIsDifferent(user, slackData)) {
